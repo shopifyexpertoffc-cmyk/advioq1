@@ -61,6 +61,17 @@
                 <h3 class="text-lg font-semibold text-white mb-6">Business Profile</h3>
                 <div class="space-y-4">
                     <div>
+                        <label class="block text-sm text-surface-400 mb-1">Brand Logo</label>
+                        <input type="file" name="business_logo" accept="image/*" class="w-full bg-surface-900 border border-surface-700 rounded-lg px-4 py-2.5 text-white text-sm">
+                        @if($tenant->business_logo)
+                            <div class="mt-3">
+                                <img src="{{ Storage::url($tenant->business_logo) }}" alt="Current brand logo" class="h-16 w-16 object-contain rounded-lg border border-surface-700 bg-surface-900 p-1">
+                                <p class="text-xs text-surface-400 mt-1">Current logo</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div>
                         <label class="block text-sm text-surface-400 mb-1">Business Name *</label>
                         <input type="text" name="business_name" value="{{ old('business_name', $tenant->business_name) }}" required class="w-full bg-surface-900 border border-surface-700 rounded-lg px-4 py-2.5 text-white text-sm">
                     </div>
