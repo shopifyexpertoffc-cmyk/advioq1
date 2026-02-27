@@ -20,11 +20,37 @@ class Tenant extends Model
         'trial_ends_at',
         'logo',
         'settings',
+        'settings_draft',
+        'business_logo',
+        'business_name',
+        'business_address',
+        'business_phone',
+        'business_email',
+        'gstin',
+        'pan',
+        'state',
+        'state_code',
+        'business_type',
+        'gst_registered',
+        'gst_rate',
+        'tds_rate',
+        'bank_name',
+        'bank_account',
+        'bank_ifsc',
+        'upi_id',
+        'instagram_url',
+        'youtube_url',
+        'twitter_url',
+        'website_url',
+        'invoice_notes',
+        'invoice_terms',
     ];
 
     protected $casts = [
         'settings' => 'array',
+        'settings_draft' => 'array',
         'trial_ends_at' => 'datetime',
+        'gst_registered' => 'boolean',
     ];
 
     // Relationships
