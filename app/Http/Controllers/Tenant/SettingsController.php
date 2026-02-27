@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Tenant;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
 
 class SettingsController extends Controller
 {
@@ -51,7 +52,15 @@ public function update(Request $request)
 
     $data['gst_registered'] = $request->has('gst_registered');
 
-    $tenant->update($data);
+    if (Schema::hasColumn('tenants', 'settings') && ! isset($data['settings'])) {
+        $data['settings'] = $this->normalizeJsonColumn($tenant->getAttribute('settings'));
+    }
+
+    if (Schema::hasColumn('tenants', 'settings_draft')) {
+        $data['settings_draft'] = $this->normalizeJsonColumn($tenant->getAttribute('settings_draft'));
+    }
+
+    $tenant->forceFill($data)->save();
 
     return back()->with('success', 'Settings updated successfully.');
 }
@@ -98,5 +107,20 @@ private function getPrevStep($step)
     $steps = ['business', 'gst', 'bank', 'social', 'invoice'];
     $index = array_search($step, $steps);
     return $steps[max($index - 1, 0)];
+}
+
+private function normalizeJsonColumn($value): string
+{
+    if (is_array($value)) {
+        return json_encode($value, JSON_UNESCAPED_UNICODE) ?: '{}';
+    }
+
+    if (! is_string($value) || trim($value) === '') {
+        return '{}';
+    }
+
+    json_decode($value);
+
+    return json_last_error() === JSON_ERROR_NONE ? $value : '{}';
 }
 }
