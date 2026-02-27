@@ -24,6 +24,23 @@
         @csrf
         <input type="hidden" name="active_tab" id="active_tab" value="{{ $currentTab }}">
 
+
+        @if(session('success'))
+            <div class="md:col-span-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 px-4 py-3 rounded-lg text-sm">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="md:col-span-12 bg-red-500/10 border border-red-500/20 text-red-300 px-4 py-3 rounded-lg text-sm">
+                <ul class="list-disc pl-5 space-y-1">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <aside class="md:col-span-3 bg-surface-800 rounded-xl p-4 h-fit">
             <h2 class="text-white text-base font-semibold mb-3">Settings Sections</h2>
             <nav class="space-y-2">
