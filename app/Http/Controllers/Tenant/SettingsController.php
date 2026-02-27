@@ -79,7 +79,7 @@ public function update(Request $request)
 
     $tenant->forceFill($data)->save();
 
-    return redirect()->route('settings', ['tab' => $tab])
+    return back()
         ->with('success', ucfirst($tab) . ' details updated successfully.');
 }
 
