@@ -14,13 +14,35 @@ use App\Models\Milestone;
 
 class InvoiceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $invoices = Invoice::with('brand')
+            ->when($request->filled('status'), function ($query) use ($request) {
+                $query->where('status', $request->status);
+            })
+            ->when($request->filled('brand_id'), function ($query) use ($request) {
+                $query->where('brand_id', $request->brand_id);
+            })
+            ->when($request->filled('date_from'), function ($query) use ($request) {
+                $query->whereDate('issue_date', '>=', $request->date_from);
+            })
+            ->when($request->filled('date_to'), function ($query) use ($request) {
+                $query->whereDate('issue_date', '<=', $request->date_to);
+            })
+            ->when($request->filled('amount_min'), function ($query) use ($request) {
+                $query->where('total_amount', '>=', $request->amount_min);
+            })
+            ->when($request->filled('amount_max'), function ($query) use ($request) {
+                $query->where('total_amount', '<=', $request->amount_max);
+            })
             ->latest()
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
-        return view('tenant.invoices.index', compact('invoices'));
+        $brands = Brand::orderBy('name')->get(['id', 'name']);
+        $statuses = ['draft', 'sent', 'viewed', 'partially_paid', 'paid', 'cancelled'];
+
+        return view('tenant.invoices.index', compact('invoices', 'brands', 'statuses'));
     }
 
 public function create()

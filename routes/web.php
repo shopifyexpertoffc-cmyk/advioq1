@@ -292,17 +292,26 @@ Route::middleware(['auth', 'tenant'])->prefix('dashboard')->name('tenant.')->gro
     
   Route::get('/', function () {
 
-    $payments = \App\Models\Payment::all();
+    $payments = \App\Models\Payment::with('brand')->get();
+    $activeCampaignsCount = \App\Models\Campaign::where('status', 'active')->count();
+
+    $monthStart = now()->startOfMonth();
+    $yearStart = now()->startOfYear();
     $invoices = \App\Models\Invoice::with('brand')->get();
     $expenses = \App\Models\Expense::all();
 
     $stats = [
         'revenue'  => $payments->sum('amount'),
+        'revenue_month' => $payments->where('payment_date', '>=', $monthStart)->sum('amount'),
+        'revenue_year' => $payments->where('payment_date', '>=', $yearStart)->sum('amount'),
         'expenses' => $expenses->sum('amount'),
         'profit'   => $payments->sum('amount') - $expenses->sum('amount'),
         'invoices' => $invoices->count(),
         'brands'   => \App\Models\Brand::count(),
         'pending'  => $invoices->whereNotIn('status', ['paid', 'cancelled'])->sum('balance_due'),
+        'outstanding_invoices' => $invoices->whereNotIn('status', ['paid', 'cancelled'])->count(),
+        'pending_payments' => $invoices->whereIn('status', ['sent', 'viewed', 'partially_paid'])->sum('balance_due'),
+        'active_campaigns' => $activeCampaignsCount,
     ];
     
  
@@ -312,6 +321,13 @@ Route::middleware(['auth', 'tenant'])->prefix('dashboard')->name('tenant.')->gro
     })->count();
 
     $recentInvoices = $invoices->sortByDesc('created_at')->take(4);
+
+    $upcomingMilestones = \App\Models\Milestone::with('campaign.brand')
+        ->where('status', '!=', 'completed')
+        ->whereDate('due_date', '>=', now()->toDateString())
+        ->orderBy('due_date')
+        ->take(5)
+        ->get();
 
     $monthlyRevenue = $payments
         ->groupBy(function ($p) {
@@ -391,6 +407,7 @@ $advanceTaxWarning = $netTaxLiability > 10000;
         'monthlyRevenue',
         'brandRevenue',
         'aging',
+        'upcomingMilestones',
         'advanceTaxWarning'
     ));
 

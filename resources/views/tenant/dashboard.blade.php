@@ -44,7 +44,18 @@
 @endif
 
     {{-- Stats --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-6">
+
+
+        <div class="glass card-hover rounded-2xl p-6">
+            <p class="text-surface-400 text-xs uppercase tracking-wide">Revenue (Month)</p>
+            <p class="text-2xl font-bold text-green-400 mt-4">₹{{ number_format($stats['revenue_month'], 0) }}</p>
+        </div>
+
+        <div class="glass card-hover rounded-2xl p-6">
+            <p class="text-surface-400 text-xs uppercase tracking-wide">Revenue (Year)</p>
+            <p class="text-2xl font-bold text-green-400 mt-4">₹{{ number_format($stats['revenue_year'], 0) }}</p>
+        </div>
 
         <div class="glass card-hover rounded-2xl p-6">
             <p class="text-surface-400 text-xs uppercase tracking-wide">Revenue</p>
@@ -79,6 +90,22 @@
             <p class="text-2xl font-bold text-red-400 mt-4">
                 {{ $overdueCount }}
             </p>
+        </div>
+
+
+        <div class="glass card-hover rounded-2xl p-6">
+            <p class="text-surface-400 text-xs uppercase tracking-wide">Outstanding Invoices</p>
+            <p class="text-2xl font-bold text-indigo-400 mt-4">{{ $stats['outstanding_invoices'] }}</p>
+        </div>
+
+        <div class="glass card-hover rounded-2xl p-6">
+            <p class="text-surface-400 text-xs uppercase tracking-wide">Pending Payments</p>
+            <p class="text-2xl font-bold text-amber-300 mt-4">₹{{ number_format($stats['pending_payments'], 0) }}</p>
+        </div>
+
+        <div class="glass card-hover rounded-2xl p-6">
+            <p class="text-surface-400 text-xs uppercase tracking-wide">Active Campaigns</p>
+            <p class="text-2xl font-bold text-cyan-400 mt-4">{{ $stats['active_campaigns'] }}</p>
         </div>
 
     </div>
@@ -239,6 +266,30 @@
 
         </div>
 
+    </div>
+
+
+    <div class="glass rounded-2xl p-8 shadow-md">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold text-white">Upcoming Milestones</h3>
+            <a href="{{ route('tenant.campaigns.index') }}" class="text-sm text-brand-400 hover:text-brand-300">View campaigns →</a>
+        </div>
+        <div class="space-y-4">
+            @forelse($upcomingMilestones as $milestone)
+                <div class="flex items-center justify-between bg-surface-700/30 p-4 rounded-xl">
+                    <div>
+                        <p class="text-white text-sm">{{ $milestone->title }}</p>
+                        <p class="text-surface-400 text-xs mt-1">{{ $milestone->campaign->title ?? 'Campaign' }} • {{ $milestone->campaign->brand->name ?? 'Brand' }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-surface-300 text-xs">Due {{ optional($milestone->due_date)->format('d M Y') }}</p>
+                        <p class="text-emerald-400 text-sm font-semibold">₹{{ number_format($milestone->amount, 0) }}</p>
+                    </div>
+                </div>
+            @empty
+                <p class="text-surface-500 text-sm">No upcoming milestones.</p>
+            @endforelse
+        </div>
     </div>
 
 </div>

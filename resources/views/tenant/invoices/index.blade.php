@@ -15,6 +15,38 @@
         </a>
     </div>
 
+    <form method="GET" class="bg-surface-800 border border-surface-700 rounded-xl p-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <select name="status" class="bg-surface-900 border border-surface-700 rounded px-3 py-2 text-sm text-surface-300">
+                <option value="">All Statuses</option>
+                @foreach($statuses as $status)
+                    <option value="{{ $status }}" @selected(request('status') === $status)>
+                        {{ ucfirst(str_replace('_', ' ', $status)) }}
+                    </option>
+                @endforeach
+            </select>
+
+            <select name="brand_id" class="bg-surface-900 border border-surface-700 rounded px-3 py-2 text-sm text-surface-300">
+                <option value="">All Brands</option>
+                @foreach($brands as $brand)
+                    <option value="{{ $brand->id }}" @selected((string) request('brand_id') === (string) $brand->id)>
+                        {{ $brand->name }}
+                    </option>
+                @endforeach
+            </select>
+
+            <input type="date" name="date_from" value="{{ request('date_from') }}" class="bg-surface-900 border border-surface-700 rounded px-3 py-2 text-sm text-surface-300" placeholder="From">
+            <input type="date" name="date_to" value="{{ request('date_to') }}" class="bg-surface-900 border border-surface-700 rounded px-3 py-2 text-sm text-surface-300" placeholder="To">
+            <input type="number" step="0.01" name="amount_min" value="{{ request('amount_min') }}" class="bg-surface-900 border border-surface-700 rounded px-3 py-2 text-sm text-surface-300" placeholder="Min Amount">
+            <input type="number" step="0.01" name="amount_max" value="{{ request('amount_max') }}" class="bg-surface-900 border border-surface-700 rounded px-3 py-2 text-sm text-surface-300" placeholder="Max Amount">
+        </div>
+
+        <div class="mt-3 flex items-center gap-3">
+            <button class="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm hover:bg-brand-700">Apply Filters</button>
+            <a href="{{ route('tenant.invoices.index') }}" class="text-sm text-surface-400 hover:text-white">Reset</a>
+        </div>
+    </form>
+
     <div class="bg-surface-800 border border-surface-700 rounded-xl overflow-hidden">
         <table class="w-full">
             <thead class="bg-surface-700/50 text-surface-400 text-xs uppercase">
