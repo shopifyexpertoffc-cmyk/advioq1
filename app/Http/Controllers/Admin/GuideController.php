@@ -47,7 +47,7 @@ class GuideController extends Controller
 
         Guide::create([
             ...$validated,
-            'slug' => $validated['slug'] ?: Str::slug($validated['title']),
+            'slug' => $this->generateUniqueSlug($validated['slug'] ?: $validated['title']),
         ]);
 
         return redirect()->route('admin.guides.index')->with('success', 'Guide created successfully.');
@@ -70,7 +70,7 @@ class GuideController extends Controller
 
         $guide->update([
             ...$validated,
-            'slug' => $validated['slug'] ?: Str::slug($validated['title']),
+            'slug' => $this->generateUniqueSlug($validated['slug'] ?: $validated['title'], $guide->id),
         ]);
 
         return redirect()->route('admin.guides.index')->with('success', 'Guide updated successfully.');
@@ -81,5 +81,22 @@ class GuideController extends Controller
         $guide->delete();
 
         return redirect()->route('admin.guides.index')->with('success', 'Guide deleted successfully.');
+    }
+
+    private function generateUniqueSlug(string $source, ?int $ignoreId = null): string
+    {
+        $base = Str::slug($source);
+        $slug = $base;
+        $counter = 2;
+
+        while (Guide::query()
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->where('slug', $slug)
+            ->exists()) {
+            $slug = $base . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
     }
 }

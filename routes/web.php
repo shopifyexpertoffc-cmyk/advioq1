@@ -262,7 +262,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         return view('admin.settings');
     })->name('settings');
     
-    Route::get('admin/billing', function () {
+    Route::get('/billing', function () {
     $tenants = \App\Models\Tenant::where('plan', 'pro')->get();
     return view('admin.billing', compact('tenants'));
 })->name('billing');
