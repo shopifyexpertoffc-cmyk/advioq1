@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Admin\TenantController;
 use App\Http\Controllers\Admin\BlogController;
+use App\Http\Controllers\Admin\GuideController;
 use App\Http\Controllers\Tenant\BrandController;
 use App\Http\Controllers\Tenant\CampaignController;
 use App\Http\Controllers\Tenant\MilestoneController;
@@ -175,6 +176,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Blog
     Route::resource('blog', BlogController::class)->except(['show']);
 
+    // Guides
+    Route::resource('guides', GuideController::class)->except(['show']);
+
     // Roadmap (Simple CRUD)
     Route::get('/roadmap', function () {
         $items = \App\Models\RoadmapItem::latest()->paginate(20);
@@ -268,6 +272,28 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         $logs = \App\Models\ActivityLog::with('user')->latest()->paginate(50);
         return view('admin.logs.index', compact('logs'));
     })->name('logs.index');
+
+    Route::get('/analytics', function () {
+        $totalTenants = \App\Models\Tenant::count();
+        $activeTenants = \App\Models\Tenant::where('status', 'active')->count();
+        $trialTenants = \App\Models\Tenant::where('status', 'trial')->count();
+        $invoiceVolume = \App\Models\Invoice::count();
+        $totalRevenue = \App\Models\Payment::sum('amount');
+
+        $revenueByPlan = \App\Models\Tenant::selectRaw('plan, COUNT(*) as tenants')
+            ->groupBy('plan')
+            ->pluck('tenants', 'plan');
+
+        $tenantGrowth = \App\Models\Tenant::selectRaw('DATE(created_at) as day, COUNT(*) as total')
+            ->whereDate('created_at', '>=', now()->subDays(30))
+            ->groupBy('day')
+            ->orderBy('day')
+            ->get();
+
+        $metrics = compact('totalTenants', 'activeTenants', 'trialTenants', 'invoiceVolume', 'totalRevenue');
+
+        return view('admin.analytics', compact('metrics', 'revenueByPlan', 'tenantGrowth'));
+    })->name('analytics');
     
     Route::post('/settings/clear-cache', function () {
     \Artisan::call('config:clear');
